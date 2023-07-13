@@ -1,12 +1,15 @@
 const express = require('express');
 const bodyParse = require('body-parser');
+const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const port = require('./port');
 const app = express();
 
 //prueba
 const { clientMarket } = require('./database');
+const config = require('./config');
 
+app.set('llave', config.llave);
 app.use(bodyParse.urlencoded({ extended: false }));
 app.use(bodyParse.json());
 app.use(cors());
@@ -16,8 +19,56 @@ app.get('/', (req, res) => {
     res.send('Hola mundo es una API Rest de mmarketdemo');
 });
 
+//autenticar mediante login
+app.post('/minimarketdemoWeb/login', (req, res) => {
+    const { codigo, clave } = req.body;
+
+    // Realizar consulta a la base de datos para verificar las credenciales
+    clientMarket.query(`SELECT * FROM seg_usuario WHERE codigo = '${codigo}' AND clave = '${clave}'`)
+        .then(response => {
+            if (response.rows.length > 0) {
+                 // Las credenciales son válidas, generar el token JWT
+                const payload = { 
+                    codigo: response.rows[0].codigo, id_seg_usuario: response.rows[0].id_seg_usuario 
+                };
+                const token = jwt.sign(payload, app.get('llave'), { 
+                    expiresIn: 1440 
+                });
+                res.json({ 
+                    mensaje: 'Autenticación correcta.', 
+                    token: token 
+                });
+            } else {
+                res.status(401).json({ mensaje: 'Usuario o contraseña incorrectos.' });
+            }
+        })
+        .catch(err => {
+          console.log(err);
+          res.status(500).json({ mensaje: 'Error en el servidor' });
+        });
+    });
+
+const rutasProtegidas = express.Router();
+
+rutasProtegidas.use((req, res, next) => {
+    const token = req.headers['access-token'];
+
+    if (token) {
+        jwt.verify(token, app.get('llave'), (err, decoded) => {
+            if (err) {
+                return res.json({ mensaje: 'Token incorrecto.' });
+            } else {
+                req.decoded = decoded;
+                next();
+            }
+        });
+    } else {
+        res.send({ mensaje: 'Debe indicar un token.' });
+    }
+});
+
 // obtener los datos de los usuarios
-app.get('/minimarketdemoWeb/apirest/seguridades/usuarios', (req, res) => {
+app.get('/minimarketdemoWeb/apirest/seguridades/usuarios', rutasProtegidas, (req, res) => {
 
     clientMarket.query('SELECT * FROM seg_usuario ORDER BY id_seg_usuario')
         .then(response => {
@@ -29,7 +80,7 @@ app.get('/minimarketdemoWeb/apirest/seguridades/usuarios', (req, res) => {
 });
 
 // obtener los datos de un usuario
-app.get('/minimarketdemoWeb/apirest/seguridades/usuarios/:id', (req, res) => {
+app.get('/minimarketdemoWeb/apirest/seguridades/usuarios/:id', rutasProtegidas,  (req, res) => {
     const { id } = req.params;
 
     clientMarket.query(`SELECT * FROM seg_usuario WHERE id_seg_usuario = '${id}'`)
@@ -42,7 +93,7 @@ app.get('/minimarketdemoWeb/apirest/seguridades/usuarios/:id', (req, res) => {
 });
 
 // para insertar un usuario
-app.post('/minimarketdemoWeb/apirest/seguridades/usuarios', (req, res) => {
+app.post('/minimarketdemoWeb/apirest/seguridades/usuarios', rutasProtegidas, (req, res) => {
     const {codigo, apellidos, nombres, correo, clave, activo} = req.body;
 
     const query = `INSERT INTO seg_usuario (codigo, apellidos, nombres, correo, clave, activo) 
@@ -60,7 +111,7 @@ app.post('/minimarketdemoWeb/apirest/seguridades/usuarios', (req, res) => {
 });
 
 // para actualizar un usuario
-app.put('/minimarketdemoWeb/apirest/seguridades/usuarios/:id', (req, res) => {
+app.put('/minimarketdemoWeb/apirest/seguridades/usuarios/:id', rutasProtegidas, (req, res) => {
     const { id } = req.params;
     const {codigo, apellidos, nombres, correo, clave, activo} = req.body;
 
@@ -79,7 +130,7 @@ app.put('/minimarketdemoWeb/apirest/seguridades/usuarios/:id', (req, res) => {
 });
 
 // para eliminar un usuario
-app.delete('/minimarketdemoWeb/apirest/seguridades/usuarios/:id', (req, res) => {
+app.delete('/minimarketdemoWeb/apirest/seguridades/usuarios/:id', rutasProtegidas, (req, res) => {
     const { id } = req.params;
     
     clientMarket.query(`DELETE FROM seg_usuario WHERE id_seg_usuario = '${id}'`)
@@ -93,7 +144,7 @@ app.delete('/minimarketdemoWeb/apirest/seguridades/usuarios/:id', (req, res) => 
 });
 
 // obtener los datos de los seg_modulos
-app.get('/minimarketdemoWeb/apirest/seguridades/modulos', (req, res) => {
+app.get('/minimarketdemoWeb/apirest/seguridades/modulos', rutasProtegidas, (req, res) => {
 
     clientMarket.query('SELECT * FROM seg_modulo ORDER BY id_seg_modulo')
         .then(response => {
@@ -105,7 +156,7 @@ app.get('/minimarketdemoWeb/apirest/seguridades/modulos', (req, res) => {
 });
 
 // obtener los datos de un seg_modulo
-app.get('/minimarketdemoWeb/apirest/seguridades/modulos/:id', (req, res) => {
+app.get('/minimarketdemoWeb/apirest/seguridades/modulos/:id', rutasProtegidas, (req, res) => {
 
     const { id } = req.params;
 
@@ -119,7 +170,7 @@ app.get('/minimarketdemoWeb/apirest/seguridades/modulos/:id', (req, res) => {
 });
 
 // obtener los datos de los seg_perfil
-app.get('/minimarketdemoWeb/apirest/seguridades/perfiles', (req, res) => {
+app.get('/minimarketdemoWeb/apirest/seguridades/perfiles', rutasProtegidas, (req, res) => {
 
     clientMarket.query('SELECT * FROM seg_perfil ORDER BY id_seg_perfil')
         .then(response => {
@@ -131,7 +182,7 @@ app.get('/minimarketdemoWeb/apirest/seguridades/perfiles', (req, res) => {
 });
 
 // obtener los datos de un seg_perfil
-app.get('/minimarketdemoWeb/apirest/seguridades/perfiles/:id', (req, res) => {
+app.get('/minimarketdemoWeb/apirest/seguridades/perfiles/:id', rutasProtegidas, (req, res) => {
 
     const { id } = req.params;
 
@@ -145,7 +196,7 @@ app.get('/minimarketdemoWeb/apirest/seguridades/perfiles/:id', (req, res) => {
 });
 
 // obtener los datos de los seg_asignaciones
-app.get('/minimarketdemoWeb/apirest/seguridades/asignaciones', (req, res) => {
+app.get('/minimarketdemoWeb/apirest/seguridades/asignaciones', rutasProtegidas, (req, res) => {
 
     clientMarket.query('SELECT * FROM seg_asignacion ORDER BY id_seg_asignacion')
         .then(response => {
@@ -157,7 +208,7 @@ app.get('/minimarketdemoWeb/apirest/seguridades/asignaciones', (req, res) => {
 });
 
 // obtener los datos de un seg_asignacion
-app.get('/minimarketdemoWeb/apirest/seguridades/asignaciones/:id', (req, res) => {
+app.get('/minimarketdemoWeb/apirest/seguridades/asignaciones/:id', rutasProtegidas, (req, res) => {
 
     const { id } = req.params;
 
@@ -171,7 +222,7 @@ app.get('/minimarketdemoWeb/apirest/seguridades/asignaciones/:id', (req, res) =>
 });
 
 // para insertar una nueva asignacion
-app.post('/minimarketdemoWeb/apirest/seguridades/asignaciones', (req, res) => {
+app.post('/minimarketdemoWeb/apirest/seguridades/asignaciones', rutasProtegidas, (req, res) => {
     
     const {id_seg_usuario, id_seg_perfil} = req.body;
 
@@ -190,7 +241,7 @@ app.post('/minimarketdemoWeb/apirest/seguridades/asignaciones', (req, res) => {
 });
 
 // para actualizar una nueva asignacion
-app.put('/minimarketdemoWeb/apirest/seguridades/asignaciones/:id', (req, res) => {
+app.put('/minimarketdemoWeb/apirest/seguridades/asignaciones/:id', rutasProtegidas, (req, res) => {
     const { id } = req.params;
     const {id_seg_usuario, id_seg_perfil} = req.body;
 
@@ -209,7 +260,7 @@ app.put('/minimarketdemoWeb/apirest/seguridades/asignaciones/:id', (req, res) =>
 });
 
 // para eliminar una asignacion
-app.delete('/minimarketdemoWeb/apirest/seguridades/asignaciones/:id', (req, res) => {
+app.delete('/minimarketdemoWeb/apirest/seguridades/asignaciones/:id', rutasProtegidas, (req, res) => {
     const { id } = req.params;
     
     clientMarket.query(`DELETE FROM seg_asignacion WHERE id_seg_asignacion = '${id}'`)
@@ -223,7 +274,7 @@ app.delete('/minimarketdemoWeb/apirest/seguridades/asignaciones/:id', (req, res)
 });
 
 // obtener los datos de los pry_proyectos
-app.get('/minimarketdemoWeb/apirest/proyectos', (req, res) => {
+app.get('/minimarketdemoWeb/apirest/proyectos', rutasProtegidas, (req, res) => {
 
     clientMarket.query('SELECT * FROM pry_proyecto ORDER BY id_pry_proyecto')
         .then(response => {
@@ -235,7 +286,7 @@ app.get('/minimarketdemoWeb/apirest/proyectos', (req, res) => {
 });
 
 // obtener los datos de un pry_proyecto
-app.get('/minimarketdemoWeb/apirest/proyectos/:id', (req, res) => {
+app.get('/minimarketdemoWeb/apirest/proyectos/:id', rutasProtegidas, (req, res) => {
 
     const { id } = req.params;
 
@@ -249,7 +300,7 @@ app.get('/minimarketdemoWeb/apirest/proyectos/:id', (req, res) => {
 });
 
 // para insertar una nuevo proyecto
-app.post('/minimarketdemoWeb/apirest/proyectos', (req, res) => {
+app.post('/minimarketdemoWeb/apirest/proyectos', rutasProtegidas, (req, res) => {
     
     const {nombre, fecha_inicio, fecha_fin, estado, avance} = req.body;
 
@@ -268,7 +319,7 @@ app.post('/minimarketdemoWeb/apirest/proyectos', (req, res) => {
 });
 
 // para actualizar una nuevo proyecto
-app.put('/minimarketdemoWeb/apirest/proyectos/:id', (req, res) => {
+app.put('/minimarketdemoWeb/apirest/proyectos/:id', rutasProtegidas, (req, res) => {
     const { id } = req.params;
     const {nombre, fecha_inicio, fecha_fin, estado, avance} = req.body;
 
@@ -287,7 +338,7 @@ app.put('/minimarketdemoWeb/apirest/proyectos/:id', (req, res) => {
 });
 
 // para eliminar un proyecto
-app.delete('/minimarketdemoWeb/apirest/proyectos/:id', (req, res) => {
+app.delete('/minimarketdemoWeb/apirest/proyectos/:id', rutasProtegidas, (req, res) => {
     const { id } = req.params;
     
     clientMarket.query(`DELETE FROM pry_proyecto WHERE id_pry_proyecto = '${id}'`)
