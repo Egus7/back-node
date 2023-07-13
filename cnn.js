@@ -27,26 +27,33 @@ app.post('/minimarketdemoWeb/login', (req, res) => {
     clientMarket.query(`SELECT * FROM seg_usuario WHERE codigo = '${codigo}' AND clave = '${clave}'`)
         .then(response => {
             if (response.rows.length > 0) {
-                 // Las credenciales son válidas, generar el token JWT
-                const payload = { 
-                    codigo: response.rows[0].codigo, id_seg_usuario: response.rows[0].id_seg_usuario 
-                };
-                const token = jwt.sign(payload, app.get('llave'), { 
-                    expiresIn: 1440 
-                });
-                res.json({ 
-                    mensaje: 'Autenticación correcta.', 
-                    token: token 
-                });
+                const usuario = response.rows[0];
+
+                if (usuario.activo) {
+                     // Las credenciales son válidas y el usuario está activo, generar el token JWT
+                    const payload = {
+                        codigo: usuario.codigo,
+                        id_seg_usuario: usuario.id_seg_usuario
+                    };
+                    const token = jwt.sign(payload, app.get('llave'), { 
+                        expiresIn: 1440 
+                    });
+                    res.json({ 
+                        mensaje: 'Autenticación correcta.', 
+                        token: token 
+                    });
+                } else {
+                    res.status(401).json({ mensaje: 'El usuario no está activo.' });
+                }
             } else {
-                res.status(401).json({ mensaje: 'Usuario o contraseña incorrectos.' });
+                    res.status(401).json({ mensaje: 'Usuario o contraseña incorrectos.' });
             }
         })
         .catch(err => {
           console.log(err);
           res.status(500).json({ mensaje: 'Error en el servidor' });
         });
-    });
+});
 
 const rutasProtegidas = express.Router();
 
