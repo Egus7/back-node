@@ -117,6 +117,25 @@ app.post('/minimarketdemoWeb/apirest/seguridades/usuarios', rutasProtegidas, (re
         });
 });
 
+// para insertar un usuario para registro
+app.post('/minimarketdemoWeb/apirest/seguridades/registro', (req, res) => {
+    const {codigo, apellidos, nombres, correo, clave, activo} = req.body;
+
+    const query = `INSERT INTO seg_usuario (codigo, apellidos, nombres, correo, clave, activo) 
+                    VALUES ($1, $2, $3, $4, $5, $6)`;
+    const values = [codigo, apellidos, nombres, correo, clave, activo];
+    
+    clientMarket.query(query, values)
+        .then(() => {
+            res.status(201).send('Usuario agregado');
+        })
+        .catch(err => {
+            console.error(err);
+            res.status(400).send('Error al agregar usuario');
+        });
+});
+
+
 // para actualizar un usuario
 app.put('/minimarketdemoWeb/apirest/seguridades/usuarios/:id', rutasProtegidas, (req, res) => {
     const { id } = req.params;
