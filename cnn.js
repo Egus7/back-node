@@ -117,6 +117,29 @@ app.post('/minimarketdemoWeb/apirest/seguridades/usuarios', rutasProtegidas, (re
         });
 });
 
+// Verificar si el código, correo o clave de usuario ya existe en la base de datos
+app.get('/minimarketdemoWeb/apirest/seguridades/usuarios/:campo/:valor', (req, res) => {
+    const { campo, valor } = req.params;
+    
+    // Verificar existencia del campo en la consulta
+    const camposValidos = ['codigo', 'correo', 'clave'];
+    if (!camposValidos.includes(campo)) {
+      res.status(400).json({ mensaje: 'Campo no válido' });
+      return;
+    }
+    
+    clientMarket.query(`SELECT EXISTS (SELECT 1 FROM seg_usuario WHERE ${campo} = '${valor}')`)
+      .then(response => {
+        const existe = response.rows[0].exists;
+        res.json({ existe });
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).json({ mensaje: 'Error en el servidor' });
+      });
+  });
+  
+  
 // para insertar un usuario para registro
 app.post('/minimarketdemoWeb/apirest/seguridades/registro', (req, res) => {
     const {codigo, apellidos, nombres, correo, clave, activo} = req.body;
