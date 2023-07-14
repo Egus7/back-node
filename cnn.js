@@ -221,6 +221,7 @@ app.get('/minimarketdemoWeb/apirest/seguridades/modulos/:id', rutasProtegidas, (
 // obtener los datos de los seg_perfil
 app.get('/minimarketdemoWeb/apirest/seguridades/perfiles', rutasProtegidas, (req, res) => {
 
+    
     clientMarket.query('SELECT * FROM seg_perfil ORDER BY id_seg_perfil')
         .then(response => {
             res.json(response.rows);
@@ -230,33 +231,7 @@ app.get('/minimarketdemoWeb/apirest/seguridades/perfiles', rutasProtegidas, (req
         });
 });
 
-// obtener los datos de un seg_perfil
-app.get('/minimarketdemoWeb/apirest/seguridades/perfiles/:id', rutasProtegidas, (req, res) => {
-
-    const { id } = req.params;
-
-    clientMarket.query(`SELECT * FROM seg_perfil WHERE id_seg_perfil = '${id}'`)
-        .then(response => {
-            res.json(response.rows);
-        })
-        .catch(err => {
-            console.log(err);
-        });
-});
-
-// obtener los datos de los seg_asignaciones
-app.get('/minimarketdemoWeb/apirest/seguridades/asignaciones', rutasProtegidas, (req, res) => {
-
-    clientMarket.query('SELECT * FROM seg_asignacion ORDER BY id_seg_asignacion')
-        .then(response => {
-            res.json(response.rows);
-        })
-        .catch(err => {
-            console.log(err);
-        });
-});
-
-// obtener los datos de un seg_asignacion
+//obtener los datos de una asignacion
 app.get('/minimarketdemoWeb/apirest/seguridades/asignaciones/:id', rutasProtegidas, (req, res) => {
 
     const { id } = req.params;
@@ -269,6 +244,26 @@ app.get('/minimarketdemoWeb/apirest/seguridades/asignaciones/:id', rutasProtegid
             console.log(err);
         });
 });
+
+app.get('/minimarketdemoWeb/apirest/seguridades/asignaciones/usuarios/:idUsuario', rutasProtegidas, (req, res) => {
+
+    const idUsuario = req.params.idUsuario;
+
+    clientMarket.query(`
+        SELECT sm.*
+        FROM seg_asignacion sa
+        INNER JOIN seg_perfil sp ON sa.id_seg_perfil = sp.id_seg_perfil
+        INNER JOIN seg_modulo sm ON sp.id_seg_modulo = sm.id_seg_modulo
+        WHERE sa.id_seg_usuario = ${idUsuario}
+    `)
+    .then(response => {
+        res.json(response.rows);
+    })
+    .catch(err => {
+        console.log(err);
+    });
+});
+
 
 // para insertar una nueva asignacion
 app.post('/minimarketdemoWeb/apirest/seguridades/asignaciones', rutasProtegidas, (req, res) => {
