@@ -231,6 +231,21 @@ app.get('/minimarketdemoWeb/apirest/seguridades/perfiles', rutasProtegidas, (req
         });
 });
 
+// obtener los datos de un seg_perfil
+app.get('/minimarketdemoWeb/apirest/seguridades/perfiles', rutasProtegidas, (req, res) => {
+
+    const { id } = req.params;
+
+    
+    clientMarket.query(`SELECT * FROM seg_perfil WHERE id_seg_perfil = ${id}`)
+        .then(response => {
+            res.json(response.rows);
+        })
+        .catch(err => {
+            console.log(err);
+        });
+});
+
 //obtener los datos de una asignacion
 app.get('/minimarketdemoWeb/apirest/seguridades/asignaciones/:id', rutasProtegidas, (req, res) => {
 
