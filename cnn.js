@@ -16,7 +16,7 @@ app.use(cors());
 
 //Hola mundo en el servidor de bienvenida 
 app.get('/', (req, res) => {
-    res.send('Hola mundo es una API Rest de mmarketdemo');
+    res.send(`Hola mundo es una API Rest de mmarketdemo`);
 });
 
 //autenticar mediante login
@@ -245,6 +245,7 @@ app.get('/minimarketdemoWeb/apirest/seguridades/asignaciones/:id', rutasProtegid
         });
 });
 
+//obtener los modulos que estan asignados a cada usuario mediante el idUsuario
 app.get('/minimarketdemoWeb/apirest/seguridades/asignaciones/usuarios/:idUsuario', rutasProtegidas, (req, res) => {
 
     const idUsuario = req.params.idUsuario;
@@ -255,6 +256,22 @@ app.get('/minimarketdemoWeb/apirest/seguridades/asignaciones/usuarios/:idUsuario
         INNER JOIN seg_perfil sp ON sa.id_seg_perfil = sp.id_seg_perfil
         INNER JOIN seg_modulo sm ON sp.id_seg_modulo = sm.id_seg_modulo
         WHERE sa.id_seg_usuario = ${idUsuario}
+    `)
+    .then(response => {
+        res.json(response.rows);
+    })
+    .catch(err => {
+        console.log(err);
+    });
+});
+
+//obtener los perfiles que estan asignados a cada usuario mediante el idUsuario
+app.get('/minimarketdemoWeb/apirest/seguridades/asignaciones/perfiles/:idUsuario', rutasProtegidas, (req, res) => {
+
+    const idUsuario = req.params.idUsuario;
+
+    clientMarket.query(`
+        SELECT * FROM seg_asignacion WHERE id_seg_usuario = ${idUsuario}
     `)
     .then(response => {
         res.json(response.rows);
