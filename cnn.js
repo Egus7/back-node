@@ -232,7 +232,7 @@ app.get('/minimarketdemoWeb/apirest/seguridades/perfiles', rutasProtegidas, (req
 });
 
 // obtener los datos de un seg_perfil
-app.get('/minimarketdemoWeb/apirest/seguridades/perfiles', rutasProtegidas, (req, res) => {
+app.get('/minimarketdemoWeb/apirest/seguridades/perfiles/:id', rutasProtegidas, (req, res) => {
 
     const { id } = req.params;
 
