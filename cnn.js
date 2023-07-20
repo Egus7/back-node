@@ -109,13 +109,14 @@ app.post('/minimarketdemoWeb/apirest/seguridades/usuarios', rutasProtegidas, (re
     
     clientMarket.query(query, values)
         .then(() => {
-            res.status(201).send('Usuario agregado');
+            res.status(201).json({ "message": "Usuario agregado correctamente" });
         })
         .catch(err => {
             console.error(err);
-            res.status(400).send('Error al agregar usuario');
+            res.status(400).json({ "message": "Error al agregar usuario" });
         });
 });
+
 
 // Verificar si el código, correo o clave de usuario ya existe en la base de datos
 app.get('/minimarketdemoWeb/apirest/seguridades/usuarios/:campo/:valor', (req, res) => {
@@ -150,11 +151,11 @@ app.post('/minimarketdemoWeb/apirest/seguridades/registro', (req, res) => {
     
     clientMarket.query(query, values)
         .then(() => {
-            res.status(201).send('Usuario agregado');
+            res.status(201).json({ "message": "Usuario agregado correctamente" });
         })
         .catch(err => {
             console.error(err);
-            res.status(400).send('Error al agregar usuario');
+            res.status(400).json({ "message": "Error al agregar usuario " });
         });
 });
 
@@ -170,11 +171,11 @@ app.put('/minimarketdemoWeb/apirest/seguridades/usuarios/:id', rutasProtegidas, 
     
     clientMarket.query(query, values)
         .then(() => {
-            res.status(201).send('Usuario actualizado');
+            res.status(201).json({ "message": "Usuario actualizado correctamente" });
         })
         .catch(err => {
             console.error(err);
-            res.status(400).send('Error al actualizar usuario');
+            res.status(400).json({ "message": "Error al actualizar el usuario" });
         });
 });
 
@@ -184,11 +185,11 @@ app.delete('/minimarketdemoWeb/apirest/seguridades/usuarios/:id', rutasProtegida
     
     clientMarket.query(`DELETE FROM seg_usuario WHERE id_seg_usuario = '${id}'`)
         .then(() => {
-            res.status(201).send('Usuario eliminado');
+            res.status(201).json({ "message": "Usuario eliminado correctamente" });
         })
         .catch(err => {
             console.error(err);
-            res.status(400).send('Error al eliminar usuario');
+            res.status(400).json({ "message": "Error al eliminar al usuario" });
         });
 });
 
@@ -308,11 +309,11 @@ app.post('/minimarketdemoWeb/apirest/seguridades/asignaciones', rutasProtegidas,
     
     clientMarket.query(query, values)
         .then(() => {
-            res.status(201).send('Asignacion agregada');
+            res.status(201).json({ "message": "Asignacion agregada correctamente" });
         })
         .catch(err => {
             console.error(err);
-            res.status(400).send('Error al agregar la asignacion');
+            res.status(400).json({ "message": "Error al agregar la asignacion" });
         });
 });
 
@@ -327,11 +328,11 @@ app.put('/minimarketdemoWeb/apirest/seguridades/asignaciones/:id', rutasProtegid
     
     clientMarket.query(query, values)
         .then(() => {
-            res.status(201).send('Asignacion actualizada');
+            res.status(201).json({ "message": "Asignacion actualizada correctamente" });
         })
         .catch(err => {
             console.error(err);
-            res.status(400).send('Error al actualizar la asignacion');
+            res.status(400).json({ "message": "Error al actulizar la asignacion" });
         });
 });
 
@@ -341,11 +342,11 @@ app.delete('/minimarketdemoWeb/apirest/seguridades/asignaciones/:id', rutasProte
     
     clientMarket.query(`DELETE FROM seg_asignacion WHERE id_seg_asignacion = '${id}'`)
         .then(() => {
-            res.status(201).send('Asignacion eliminado');
+            res.status(201).json({ "message": "Asignacion eliminada correctamente" });;
         })
         .catch(err => {
             console.error(err);
-            res.status(400).send('Error al eliminar la asignacion');
+            res.status(400).json({ "message": "Error al elimimar la asignacion" });
         });
 });
 
@@ -386,11 +387,11 @@ app.post('/minimarketdemoWeb/apirest/proyectos', rutasProtegidas, (req, res) => 
     
     clientMarket.query(query, values)
         .then(() => {
-            res.status(201).send('Proyecto agregado');
+            res.status(201).json({ "message": "Proyecto agregado correctamente" });
         })
         .catch(err => {
             console.error(err);
-            res.status(400).send('Error al agregar el proyecto');
+            res.status(400).json({ "message": "Error al agregar proyecto" });
         });
 });
 
@@ -405,11 +406,11 @@ app.put('/minimarketdemoWeb/apirest/proyectos/:id', rutasProtegidas, (req, res) 
     
     clientMarket.query(query, values)
         .then(() => {
-            res.status(201).send('Proyecto actualizado');
+            res.status(201).json({ "message": "Proyecto actualizado correctamente" });
         })
         .catch(err => {
             console.error(err);
-            res.status(400).send('Error al actualizar el proyecto');
+            res.status(400).json({ "message": "Error al actualizar el proyecto" });
         });
 });
 
@@ -419,11 +420,11 @@ app.delete('/minimarketdemoWeb/apirest/proyectos/:id', rutasProtegidas, (req, re
     
     clientMarket.query(`DELETE FROM pry_proyecto WHERE id_pry_proyecto = '${id}'`)
         .then(() => {
-            res.status(201).send('Proyecto eliminado');
+            res.status(201).json({ "message": "Proyecto eliminado correctamente" });
         })
         .catch(err => {
             console.error(err);
-            res.status(400).send('Error al eliminar el proyecto');
+            res.status(400).json({ "message": "Error al eliminar el proyecto" });
         });
 });
 
